@@ -52,10 +52,16 @@ fig = go.Figure(data=[go.Pie(
 fig.update_layout(height=400, showlegend=True)
 st.plotly_chart(fig, use_container_width=True)
 
-# Risk breakdown bar chart
+# Risk breakdown bar chart - FIXED BRACKETS
 st.subheader("Risk Factor Breakdown")
 factors = pd.DataFrame({
     'Factor': ['Amount', 'Time', 'Location', 'Device', 'Merchant'],
     'Risk Contribution': [
         amount * 0.01,
         (48 - time) * 0.5,
+        25 if location == "Foreign Country" else 10 if location == "Different City" else 0,
+        20 if device == "New Device" else 0,
+        15 if merchant in ["Travel", "Online Gaming"] else 0
+    ]
+})
+st.bar_chart(factors.set_index('Factor'))
