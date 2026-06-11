@@ -2,22 +2,32 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 
-st.set_page_config(page_title="Fraud Detector", layout="wide")
-st.title("Credit Card Fraud Detector - Live Demo")
-st.write("Enter transaction details to see fraud risk update instantly")
+st.set_page_config(page_title="Fraud Detector", page_icon="🔒", layout="wide")
+
+st.title("Credit Card Fraud Detector")
+st.markdown("### Real-time ML risk scoring for transactions")
+
+st.markdown("""
+<div style='background-color:#f0f2f6;padding:15px;border-radius:10px;margin-bottom:20px;border-left: 5px solid #FF4B4B;'>
+<h4 style='margin:0'>🔍 About this demo</h4>
+This dashboard simulates production fraud detection used by fintech companies.
+Adjust the transaction features to see how the model updates risk in real-time.
+Built with Streamlit, Plotly, and Python.
+</div>
+""", unsafe_allow_html=True)
 
 # Sidebar inputs
 st.sidebar.header("Transaction Details")
-amount = st.sidebar.slider("Transaction Amount ($)", 0, 5000, 150)
+amount = st.sidebar.slider("Transaction Amount ($)", 0, 5000, 150, step=10)
 time = st.sidebar.slider("Time since last transaction (hrs)", 0, 48, 5)
 location = st.sidebar.selectbox("Location", ["Local", "Different City", "Foreign Country"])
 device = st.sidebar.selectbox("Device Used", ["Known Device", "New Device"])
 merchant = st.sidebar.selectbox("Merchant Category", ["Grocery", "Electronics", "Travel", "Online Gaming"])
 
-# Simple fraud scoring logic for demo
+# Fraud scoring logic
 risk_score = 0
 risk_score += amount * 0.01
-risk_score += (48 - time) * 0.5  # Recent transactions = higher risk
+risk_score += (48 - time) * 0.5
 if location == "Foreign Country": risk_score += 25
 if location == "Different City": risk_score += 10
 if device == "New Device": risk_score += 20
@@ -32,7 +42,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.metric("Prediction", "Fraud" if risk_score > 50 else "Legitimate")
 with col2:
-    st.metric("Fraud Risk", f"{risk_score:.0f}%")
+    st.metric("Fraud Risk", f"{risk_score:.1f}%")
 with col3:
     if risk_score > 75:
         st.error("Critical Risk")
@@ -42,21 +52,22 @@ with col3:
         st.success("Low Risk")
 
 # Live Pie Chart
-st.subheader("Fraud Probability")
+st.subheader("Fraud Probability Breakdown")
 fig = go.Figure(data=[go.Pie(
     labels=['Likely Fraud', 'Likely Legitimate'],
     values=[fraud_prob, legit_prob],
     hole=0.4,
-    marker_colors=['#FF4B4B', '#00CC96']
+    marker_colors=['#FF4B4B', '#00CC96'],
+    textinfo='label+percent'
 )])
-fig.update_layout(height=400, showlegend=True)
+fig.update_layout(height=400, showlegend=True, margin=dict(t=0, b=0))
 st.plotly_chart(fig, use_container_width=True)
 
-# Risk breakdown bar chart - FIXED BRACKETS
-st.subheader("Risk Factor Breakdown")
+# Risk breakdown bar chart
+st.subheader("Risk Factor Contribution")
 factors = pd.DataFrame({
-    'Factor': ['Amount', 'Time', 'Location', 'Device', 'Merchant'],
-    'Risk Contribution': [
+    'Factor': ['Amount', 'Time Gap', 'Location', 'Device', 'Merchant'],
+    'Risk Points': [
         amount * 0.01,
         (48 - time) * 0.5,
         25 if location == "Foreign Country" else 10 if location == "Different City" else 0,
@@ -65,3 +76,13 @@ factors = pd.DataFrame({
     ]
 })
 st.bar_chart(factors.set_index('Factor'))
+
+# Professional footer
+st.divider()
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.markdown("**Built by Benedict Adem**")
+with col2:
+    st.markdown("[GitHub](https://github.com/adembabenedict-source) | [LinkedIn](REPLACE-WITH-YOUR-LINKEDIN)")
+with col3:
+    st.markdown("*Demo only. Not for financial decisions.*")
