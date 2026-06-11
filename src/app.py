@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import os
 
 # Page config
 st.set_page_config(
@@ -13,10 +14,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load model
+# Load model - FIXED LINE 19 FOR STREAMLIT CLOUD
 @st.cache_resource
 def load_model():
-    with open('fraud_model.pkl', 'rb') as f:
+    model_path = os.path.join(os.path.dirname(__file__), 'fraud_model.pkl')
+    with open(model_path, 'rb') as f:
         return pickle.load(f)
 
 model = load_model()
@@ -74,7 +76,7 @@ with tab1:
         st.progress(risk_proba / 100)
         
     with col2:
-        # SHAP-style feature importance - FIXED LINE 79
+        # SHAP-style feature importance
         feature_names = ['Amount', 'Time Gap', 'Location', 'Device', 'Merchant']
         importances = model.feature_importances_ if hasattr(model, 'feature_importances_') else [0.3, 0.2, 0.2, 0.15, 0.15]
         
@@ -132,7 +134,7 @@ with tab3:
     This demo shows the exact ML engineering pattern used at Stripe, Revolut, and Chime.
     """)
 
-# Footer - FIXED LINKEDIN
+# Footer
 st.divider()
 c1, c2, c3 = st.columns([1,2,1])
 with c1: st.caption("Built by Benedict Ademba")
